@@ -1,0 +1,52 @@
+Create database lib;
+use lib;
+CREATE TABLE Books (
+    book_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255),
+    genre VARCHAR(100),
+    published_year INT,
+    available_copies INT default 1
+);
+CREATE TABLE Members (
+    member_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    join_date Date
+);
+CREATE TABLE Transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    book_id INT,
+    member_id INT,
+    borrow_date DATE NOT NULL,
+    return_date DATE,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id),
+    FOREIGN KEY (member_id) REFERENCES Members(member_id)
+);
+INSERT INTO Books (title, author, genre, published_year, available_copies)
+VALUES ('To Kill a Mockingbird', 'Harper Lee', 'Fiction',1980,5);
+INSERT INTO Books (title, author, genre, published_year, available_copies)
+VALUES (' a Man', 'loo', 'action',1930,3);
+INSERT INTO Members (name, email, phone, join_date)
+VALUES ('John Doe', 'johndoe@example.com', '123-456-7890','2024-08-09');
+INSERT INTO Members (name, email, phone, join_date)
+VALUES ('Johnnathan', 'johnnathan@example.com', '143-489-8890','2024-08-01');
+INSERT INTO Transactions (book_id, member_id, borrow_date)
+VALUES (1, 1, '2024-08-09');
+INSERT INTO Transactions (book_id, member_id, borrow_date)
+VALUES (2, 2, '2024-08-01');
+UPDATE Books
+SET available_copies = available_copies - 1
+WHERE book_id=1;
+UPDATE Transactions
+SET return_date='2024-08-16'
+WHERE transaction_id=1;
+SELECT * FROM Books;
+SELECT * FROM Members;
+SELECT * FROM Transactions;
+SELECT Books.title, Transactions.borrow_date, Transactions.return_date
+FROM Books
+JOIN Transactions ON Books.book_id = Transactions.book_id
+WHERE Transactions.member_id=1;
+DELETE FROM Transactions WHERE book_id=2;
