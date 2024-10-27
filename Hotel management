@@ -1,0 +1,54 @@
+create database db1;
+use db1;
+
+CREATE TABLE Rooms (
+    RoomID INT PRIMARY KEY AUTO_INCREMENT,
+    RoomNumber VARCHAR(10) UNIQUE NOT NULL,
+    RoomType VARCHAR(50) NOT NULL,
+    Description TEXT,
+    PricePerNight DECIMAL(10, 2) NOT NULL,
+    Status ENUM('Available', 'Occupied', 'Under Maintenance') DEFAULT 'Available'
+);
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(15),
+    Address TEXT
+);
+CREATE TABLE Reservations (
+    ReservationID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT NOT NULL,
+    RoomID INT NOT NULL,
+    CheckInDate DATE NOT NULL,
+    CheckOutDate DATE NOT NULL,
+    TotalAmount DECIMAL(10, 2) NOT NULL,
+    Status ENUM('Confirmed', 'Checked In', 'Checked Out', 'Cancelled') DEFAULT 'Confirmed',
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID)
+);
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY AUTO_INCREMENT,
+    ReservationID INT NOT NULL,
+    PaymentDate DATE NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentMethod ENUM('Credit Card', 'Debit Card', 'Cash', 'Online') NOT NULL,
+    FOREIGN KEY (ReservationID) REFERENCES Reservations(ReservationID)
+);
+/*find available rooms*/
+SELECT r.RoomID, r.RoomNumber, r.RoomType, r.PricePerNight
+FROM Rooms r
+LEFT JOIN Reservations res ON r.RoomID = res.RoomID
+AND ((res.CheckInDate <= '2024-08-10' AND res.CheckOutDate >= '2024-08-09') 
+     OR (res.CheckInDate <= '2024-08-09' AND res.CheckOutDate >= '2024-08-10'))
+WHERE res.ReservationID IS NULL AND r.Status = 'Available';
+/*Get Reservation Details for a Customer:*/
+SELECT res.ReservationID, r.RoomNumber, res.CheckInDate, res.CheckOutDate, res.TotalAmount, res.Status
+FROM Reservations res
+JOIN Rooms r ON res.RoomID = r.RoomID
+WHERE res.CustomerID = 123; 
+/*calculate total payment*/
+SELECT SUM(p.Amount) AS TotalPaid
+FROM Payments p
+WHERE p.ReservationID = 456; 
